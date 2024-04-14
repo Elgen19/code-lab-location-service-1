@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Code Lab Location Service 1</string>
+    <string name="fine_location_permission_granted">Fine Location Permission Granted</string>
+    <string name="coarse_location_permission_granted">Coarse Location Permission Granted</string>
+    <string name="permission_required_for_location">Permission required for location</string>
+    <string name="fine_location_permission_granted_true">Fine Location Permission Granted</string>
+    <string name="coarse_location_permission_granted_yes">Coarse Location Permission Granted</string>
+    <string name="permission_denied">Permission denied</string>
+</resources>
