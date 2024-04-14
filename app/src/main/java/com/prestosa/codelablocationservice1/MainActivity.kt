@@ -1,12 +1,9 @@
 package com.prestosa.codelablocationservice1
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -14,106 +11,85 @@ import androidx.core.content.ContextCompat
 class MainActivity : AppCompatActivity() {
 
     private val REQUEST_CODE = 123
-    private lateinit var locationManager: LocationManager
+    private lateinit var textView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        textView = findViewById(R.id.textView)
 
-        // Check and request location permissions
-        isLocationPermissionGranted()
+        checkLocationPermission()
     }
 
-    private fun isLocationPermissionGranted() {
-        if (ContextCompat.checkSelfPermission(
+    private fun checkLocationPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Request permission
-            ActivityCompat.requestPermissions(
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Permission already granted, display in the TextView
+                textView.text = getString(R.string.fine_location_permission_granted)
+            }
+            ContextCompat.checkSelfPermission(
                 this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_CODE
-            )
-        } else {
-            // Permission already granted, start location updates
-            startLocationUpdates()
-        }
-    }
-
-    private fun startLocationUpdates() {
-        try {
-            // Check if GPS provider is enabled
-            val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            if (hasGps) {
-                // Request location updates
-                locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    5000,
-                    0F,
-                    gpsLocationListener
-                )
-            } else {
-                // GPS provider is not enabled, handle accordingly
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // Coarse location permission granted, display in the TextView
+                textView.text = getString(R.string.coarse_location_permission_granted)
             }
-
-            // Check if Network provider is enabled
-            val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-            if (hasNetwork) {
-                // Request location updates
-                locationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER,
-                    5000,
-                    0F,
-                    networkLocationListener
-                )
-            } else {
-                // Network provider is not enabled, handle accordingly
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                // Explain to the user why your app requires this permission
+                // Show UI to request permission again
+                showPermissionExplanation()
             }
-        } catch (e: SecurityException) {
-            // Handle SecurityException, e.g., request permission again or show a message to the user
+            else -> {
+                // Request the ACCESS_FINE_LOCATION permission
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ),
+                    REQUEST_CODE
+                )
+            }
         }
     }
 
-    private val gpsLocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            // Handle GPS location updates
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
-    }
-
-    private val networkLocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {
-            // Handle network location updates
-        }
-
-        @Deprecated("Deprecated in Java")
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
+    private fun showPermissionExplanation() {
+        // Show UI to explain why location permission is necessary
+        textView.text = getString(R.string.permission_required_for_location)
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, start location updates
-                startLocationUpdates()
-            } else {
-                // Permission denied, handle accordingly
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Permission granted, display in the TextView
+                    textView.text = getString(R.string.fine_location_permission_granted_true)
+                } else if (grantResults.isNotEmpty() &&
+                    grantResults[1] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Coarse location permission granted, display in the TextView
+                    textView.text = getString(R.string.coarse_location_permission_granted_yes)
+                } else {
+                    // Explain to the user that the feature is unavailable
+                    // Respect the user's decision
+                    // Optionally, show UI to explain again or navigate to settings
+                    textView.text = getString(R.string.permission_denied)
+                }
             }
         }
     }
 }
-

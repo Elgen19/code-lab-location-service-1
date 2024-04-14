@@ -5,8 +5,6 @@
     <!-- Required when requesting precise location access on Android 12 (API level 31) and higher. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
